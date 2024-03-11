@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
                     addr = (struct sockaddr_in*)ifa->ifa_addr;
 
                     /* 
-                     * use "en0" for Ethernet/Wi-Fi interface 
+                     * ese "en0" for Ethernet/Wi-Fi interface 
                      * note: this is assigned by argv[1] 
                      */
                     if (strcmp(ifa->ifa_name, dev) == 0) {
@@ -53,14 +53,36 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            /* free the memory allocated by getifaddrs */
+            /* Free the memory allocated by getifaddrs */
             freeifaddrs(ifap); 
         } 
-
+        
         else {
             std::cerr << "Failed to get IP address." << std::endl;
         }
+
+    } else {
+
+        std::cout << "No additional command-line arguments provided." << std::endl;
+    }
+
+    /* create an error buffer to store any errors that may be thrown and set the buffer to max size */
+    char errbuf[PCAP_ERRBUF_SIZE];
+    pcap_t* handle;
+
+    /* 
+     * find all available network devices 
+     * note: we do not use the alldevs in this
+     * program, and is only here for reference.
+     * alldevs contains all devices on the system
+     * and can access each by walking the list
+     */
+    pcap_if_t* alldevs;
+    if (pcap_findalldevs(&alldevs, errbuf) == -1) {
+        std::cerr << "Error finding network devices: " << errbuf << std::endl;
+        return 1;
     }
 
     return 0;
+
 }
