@@ -42,8 +42,57 @@ void packet_handler(unsigned char* user_data, const struct pcap_pkthdr* pkthdr, 
             std::cout << "Destination Port: " << ntohs(tcp_header->th_dport) << std::endl;
         }
     }
+/* 
+ * condition ran if the #ifdef statement is false
+ * code below is meant for Linux 
+ */
+#else
+    /*
+     * Linux can parse Ethernet headers
+     * check if it's an Ethernet (DLT_EN10MB) packet
+     */
+    int data_link_type = pcap_datalink(nullptr);
+    if (data_link_type == DLT_EN10MB) {
 
+        /* check if the packet is large enough to contain an Ethernet header */
+        if (pkthdr->len >= sizeof(struct ether_header)) {
+
+            /* parse Ethernet header */
+            struct ether_header* eth_header = (struct ether_header*)packet_data;
+            std::cout << "Source MAC: ";
+            for (int i = 0; i < 6; ++i) {
+                printf("%02x", eth_header->ether_shost[i]);
+                if (i < 5) {
+                    std::cout << ":";
+                }
+            }
+            std::cout << std::endl;
+            std::cout << "Destination MAC: ";
+            for (int i = 0; i < 6; ++i) {
+                printf("%02x", eth_header->ether_dhost[i]);
+                if (i < 5) {
+                    std::cout << ":";
+                }
+            }
+            std::cout << std::endl;
+        }
+    }
+    
+    /* check if it's an IP packet */
+    if (pkthdr->len >= sizeof(struct ip)) {
+        struct ip* ip_header = (struct ip*)(packet_data + sizeof(struct ether_header)); // Skip Ethernet header
+        std::cout << "Source IP: " << inet_ntoa(ip_header->ip_src) << std::endl;
+        std::cout << "Destination IP: " << inet_ntoa(ip_header->ip_dst) << std::endl;
+
+        /* check if it's a TCP packet */
+        if (ip_header->ip_p == IPPROTO_TCP && pkthdr->len >= (sizeof(struct ether_header) + sizeof(struct ip) + sizeof(struct tcphdr))) {
+            struct tcphdr* tcp_header = (struct tcphdr*)(packet_data + sizeof(struct ether_header) + ip_header->ip_hl * 4); // Skip IP header
+            std::cout << "Source Port: " << ntohs(tcp_header->th_sport) << std::endl;
+            std::cout << "Destination Port: " << ntohs(tcp_header->th_dport) << std::endl;
+        }
+    }
 #endif
+
 }
 
 int main(int argc, char* argv[]) {
