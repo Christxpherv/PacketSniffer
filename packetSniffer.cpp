@@ -93,6 +93,13 @@ void packet_handler(unsigned char* user_data, const struct pcap_pkthdr* pkthdr, 
     }
 #endif
 
+    /* print packet data (hexadecimal representation) */
+    std::cout << "Packet data (hex): \n";
+    for (int i = 0; i < pkthdr->len; ++i) {
+        printf("%02x ", packet_data[i]);
+        if (i % 8 == 0) printf("\n");
+    }
+    std::cout << std::endl;
 }
 
 int main(int argc, char* argv[]) {
