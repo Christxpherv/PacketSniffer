@@ -29,6 +29,38 @@ int main(int argc, char* argv[]) {
         
         /* we assign the device name to the device variable */
         dev = argv[1];
-        
+
+        struct ifaddrs* ifap;
+        struct sockaddr_in* addr;
+
+        /* 
+         * below we are checking that we can acquire our local IP
+         * address and if we are successful we print it so we can 
+         * compare across packets if needed.
+         */
+        if (getifaddrs(&ifap) == 0) {
+            for (struct ifaddrs* ifa = ifap; ifa != nullptr; ifa = ifa->ifa_next) {
+                if (ifa->ifa_addr != nullptr && ifa->ifa_addr->sa_family == AF_INET) {
+                    addr = (struct sockaddr_in*)ifa->ifa_addr;
+
+                    /* 
+                     * use "en0" for Ethernet/Wi-Fi interface 
+                     * note: this is assigned by argv[1] 
+                     */
+                    if (strcmp(ifa->ifa_name, dev) == 0) {
+                        std::cout << "Your IP address on " << ifa->ifa_name << ": " << inet_ntoa(addr->sin_addr) << std::endl;
+                    }
+                }
+            }
+
+            /* free the memory allocated by getifaddrs */
+            freeifaddrs(ifap); 
+        } 
+
+        else {
+            std::cerr << "Failed to get IP address." << std::endl;
+        }
+    }
+
     return 0;
 }
