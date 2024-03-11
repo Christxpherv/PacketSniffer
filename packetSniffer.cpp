@@ -100,6 +100,20 @@ void packet_handler(unsigned char* user_data, const struct pcap_pkthdr* pkthdr, 
         if (i % 8 == 0) printf("\n");
     }
     std::cout << std::endl;
+
+    /* print packet data (ASCII representation) */
+    std::cout << "Packet data (ASCII): \n";
+    for (int i = 0; i < pkthdr->len; ++i) {
+        char c = packet_data[i];
+        if (isprint(c)) {
+            std::cout << c;
+        } 
+        else {
+            std::cout << ".";
+        }
+    }
+    std::cout << std::endl;
+        std::cout << "------------------- Packet End -------------------" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
