@@ -83,6 +83,20 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    /* sets the actual device that we are going to be listening to */
+    pcap_if_t* device;
+    int deviceCount = 0;
+
+    /* specifies promiscuous mode - meaning all network traffic is captured (live listen) */
+    handle = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf);
+    if (handle == nullptr) {
+        std::cerr << "Could not open device " << dev << ": " << errbuf << std::endl;
+        
+        /* free all devices in the list including that stored in dev */
+        pcap_freealldevs(alldevs);
+        return 1;
+    }
+
     return 0;
 
 }
