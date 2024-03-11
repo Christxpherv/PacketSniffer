@@ -97,6 +97,15 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    /* start capturing packets and call the packet_handler function for each packet */ 
+    pcap_loop(handle, 0, packet_handler, nullptr);
+
+    /* close the capture handle when done */ 
+    pcap_close(handle);
+
+    /* free the device list */
+    pcap_freealldevs(alldevs);
+
     return 0;
 
 }
