@@ -13,6 +13,18 @@
 #define MACOS
 #endif
 
+/* 
+ * create the packet_handler function that handles all the data
+ * parses the packet headers, extracts source and destination information, 
+ * and prints hexadecimal and ASCII representations of the packet data.
+ */
+void packet_handler(unsigned char* user_data, const struct pcap_pkthdr* pkthdr, const unsigned char* packet_data) {
+    /* lets the user know where the start of a packet is located */
+    std::cout << "----------------- Packet Data Captured -----------------" << std::endl;
+    /* lets the user know the length of the packet */
+    std::cout << "Captured Packet Length: " << pkthdr->len << " bytes." << std::endl;
+}
+
 int main(int argc, char* argv[]) {
 
     
