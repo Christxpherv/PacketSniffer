@@ -23,6 +23,27 @@ void packet_handler(unsigned char* user_data, const struct pcap_pkthdr* pkthdr, 
     std::cout << "----------------- Packet Data Captured -----------------" << std::endl;
     /* lets the user know the length of the packet */
     std::cout << "Captured Packet Length: " << pkthdr->len << " bytes." << std::endl;
+
+    #ifdef MACOS
+    /*
+     * on macOS, Ethernet headers are not available, so we skip Ethernet parsing
+     * check if it's an IP packet
+     */
+
+    if (pkthdr->len >= sizeof(struct ip)) {
+        struct ip* ip_header = (struct ip*)packet_data;
+        std::cout << "Source IP: " << inet_ntoa(ip_header->ip_src) << std::endl;
+        std::cout << "Destination IP: " << inet_ntoa(ip_header->ip_dst) << std::endl;
+
+        /* check if it's a TCP packet */
+        if (ip_header->ip_p == IPPROTO_TCP && pkthdr->len >= (sizeof(struct ip) + sizeof(struct tcphdr))) {
+            struct tcphdr* tcp_header = (struct tcphdr*)(packet_data + ip_header->ip_hl * 4); // Skip IP header
+            std::cout << "Source Port: " << ntohs(tcp_header->th_sport) << std::endl;
+            std::cout << "Destination Port: " << ntohs(tcp_header->th_dport) << std::endl;
+        }
+    }
+
+#endif
 }
 
 int main(int argc, char* argv[]) {
